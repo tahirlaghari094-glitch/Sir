@@ -4,16 +4,12 @@ const path = require('path');
 const app = express();
 
 app.use(express.json());
-
-// 1. Static files serve karne ke liye
 app.use(express.static(__dirname));
 
-// 2. Home route add karein taake index.html load ho
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Gmail Transporter Setup
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -22,19 +18,19 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-let users = {};
+// In-memory store (Fallback)
+let activeUsers = new Set();
 
 app.post('/api/submit-subscription', (req, res) => {
     const { name, email, plan, price, txid } = req.body;
     const userId = Date.now().toString();
 
-    users[userId] = { name, email, plan, status: 'pending' };
-
     const protocol = req.headers['x-forwarded-proto'] || 'https';
     const host = process.env.VERCEL_URL || req.headers.host;
     const baseUrl = host.startsWith('http') ? host : `${protocol}://${host}`;
 
-    const approveLink = `${baseUrl}/api/approve/${userId}`;
+    // Direct approve link with email param
+    const approveLink = `${baseUrl}/api/approve/${userId}?email=${encodeURIComponent(email)}`;
 
     const mailOptions = {
         from: '"Meta Ads Portal" <lagharitahir08@gmail.com>',
@@ -60,17 +56,33 @@ app.post('/api/submit-subscription', (req, res) => {
             console.log('Error:', error);
             return res.status(500).json({ success: false, message: 'Email failed' });
         }
-        res.json({ success: true, message: 'Submitted successfully' });
+        res.json({ success: true, userId, message: 'Submitted successfully' });
     });
 });
 
+// Approve Endpoint
 app.get('/api/approve/:userId', (req, res) => {
-    const userId = req.params.userId;
-    if (users[userId]) {
-        users[userId].status = 'active';
-        res.send('<div style="text-align:center; padding: 50px; font-family: sans-serif;"><h1 style="color:green;">Subscription Approved!</h1><p>User portal has been unlocked.</p></div>');
+    const { userId } = req.params;
+    const { email } = req.query;
+
+    activeUsers.add(userId);
+    if(email) activeUsers.add(email);
+
+    res.send(`
+        <div style="text-align:center; padding: 50px; font-family: sans-serif;">
+            <h1 style="color:green;">Subscription Approved!</h1>
+            <p>User account (${email || userId}) has been unlocked successfully.</p>
+        </div>
+    `);
+});
+
+// Status check API for frontend polling
+app.get('/api/check-status/:id', (req, res) => {
+    const { id } = req.params;
+    if (activeUsers.has(id)) {
+        res.json({ status: 'active' });
     } else {
-        res.send('<h1>Invalid Link or Request Expired!</h1>');
+        res.json({ status: 'pending' });
     }
 });
 
