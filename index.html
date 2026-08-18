@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaAI Automator - Pro Ads Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glow-button {
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen">
+
+    <!-- Top Navbar -->
+    <nav class="border-b border-slate-800 bg-slate-900/80 sticky top-0 z-50 backdrop-blur-md px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="bg-indigo-600 p-2 rounded-xl text-white">
+                <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+            </div>
+            <span class="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">MetaAI Suite</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="user-status-badge" class="bg-yellow-500/10 text-yellow-400 text-xs font-semibold px-3 py-1.5 rounded-full border border-yellow-500/20 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-yellow-400 animate-ping"></span> Subscription: Inactive
+            </span>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto p-6 space-y-10">
+
+        <!-- SECTION 1: Subscription Plans -->
+        <div id="pricing-section" class="space-y-8">
+            <div class="text-center space-y-2">
+                <h1 class="text-4xl font-extrabold tracking-tight">Choose Your Automation Plan</h1>
+                <p class="text-slate-400 max-w-lg mx-auto text-sm">Automate your Meta Ads, schedule posts using AI, and grow your sales instantly.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <!-- 1 Month -->
+                <div class="glass p-6 rounded-2xl space-y-4 hover:border-indigo-500/50 transition duration-300">
+                    <div class="text-sm text-indigo-400 font-semibold">Starter</div>
+                    <h3 class="text-2xl font-bold">1 Month</h3>
+                    <div class="text-3xl font-extrabold text-white">PKR 5,000</div>
+                    <ul class="text-xs text-slate-300 space-y-2">
+                        <li><i class="fa-solid fa-check text-indigo-400 mr-2"></i>AI Ad Generator</li>
+                        <li><i class="fa-solid fa-check text-indigo-400 mr-2"></i>Single Page Connect</li>
+                    </ul>
+                    <button onclick="selectPlan('1 Month', '5000')" class="w-full bg-slate-800 hover:bg-slate-700 py-2.5 rounded-xl text-sm font-semibold border border-slate-700">Select Plan</button>
+                </div>
+
+                <!-- 6 Months -->
+                <div class="glass p-6 rounded-2xl space-y-4 border-2 border-indigo-500 relative glow-button">
+                    <span class="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full absolute -top-3 right-6 shadow-lg">POPULAR</span>
+                    <div class="text-sm text-indigo-400 font-semibold">Pro Growth</div>
+                    <h3 class="text-2xl font-bold">6 Months</h3>
+                    <div class="text-3xl font-extrabold text-white">PKR 25,000</div>
+                    <ul class="text-xs text-slate-300 space-y-2">
+                        <li><i class="fa-solid fa-check text-indigo-400 mr-2"></i>AI Auto Scheduling</li>
+                        <li><i class="fa-solid fa-check text-indigo-400 mr-2"></i>Multi-Page Meta Sync</li>
+                    </ul>
+                    <button onclick="selectPlan('6 Months', '25000')" class="w-full bg-indigo-600 hover:bg-indigo-500 py-2.5 rounded-xl text-sm font-bold shadow-lg">Select Plan</button>
+                </div>
+
+                <!-- 1 Year -->
+                <div class="glass p-6 rounded-2xl space-y-4 hover:border-indigo-500/50 transition duration-300">
+                    <div class="text-sm text-indigo-400 font-semibold">Business</div>
+                    <h3 class="text-2xl font-bold">1 Year</h3>
+                    <div class="text-3xl font-extrabold text-white">PKR 45,000</div>
+                    <ul class="text-xs text-slate-300 space-y-2">
+                        <li><i class="fa-solid fa-check text-indigo-400 mr-2"></i>Unlimited AI Posts</li>
+                        <li><i class="fa-solid fa-check text-indigo-400 mr-2"></i>Priority Auto-Posting</li>
+                    </ul>
+                    <button onclick="selectPlan('1 Year', '45000')" class="w-full bg-slate-800 hover:bg-slate-700 py-2.5 rounded-xl text-sm font-semibold border border-slate-700">Select Plan</button>
+                </div>
+
+                <!-- 5 Years -->
+                <div class="glass p-6 rounded-2xl space-y-4 hover:border-indigo-500/50 transition duration-300">
+                    <div class="text-sm text-indigo-400 font-semibold">Enterprise</div>
+                    <h3 class="text-2xl font-bold">5 Years</h3>
+                    <div class="text-3xl font-extrabold text-white">PKR 150,000</div>
+                    <ul class="text-xs text-slate-300 space-y-2">
+                        <li><i class="fa-solid fa-check text-indigo-400 mr-2"></i>Lifetime VIP Support</li>
+                        <li><i class="fa-solid fa-check text-indigo-400 mr-2"></i>Custom Meta Ad Models</li>
+                    </ul>
+                    <button onclick="selectPlan('5 Years', '150000')" class="w-full bg-slate-800 hover:bg-slate-700 py-2.5 rounded-xl text-sm font-semibold border border-slate-700">Select Plan</button>
+                </div>
+            </div>
+
+            <!-- EasyPaisa Form Modal -->
+            <div id="payment-form" class="hidden glass p-8 rounded-2xl max-w-lg mx-auto border border-emerald-500/30 space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <h2 class="text-xl font-bold text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-wallet"></i> EasyPaisa Payment Details</h2>
+                    <span id="selected-plan-badge" class="bg-indigo-500/20 text-indigo-300 text-xs px-2.5 py-1 rounded-md font-mono">--</span>
+                </div>
+                
+                <div class="bg-emerald-950/30 border border-emerald-500/30 p-4 rounded-xl space-y-2">
+                    <p class="text-xs text-slate-300">Send total amount via EasyPaisa to:</p>
+                    <div class="text-2xl font-mono font-bold text-emerald-400">03123735457</div>
+                    <p class="text-xs text-slate-400">Account Title: <span class="text-slate-200">EasyPaisa Account</span></p>
+                </div>
+
+                <div class="space-y-4">
+                    <input type="text" id="user-name" placeholder="Full Name" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                    <input type="email" id="user-email" placeholder="Your Email Address" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="user-txid" placeholder="EasyPaisa Transaction ID (Trx ID)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <button onclick="submitSubscription()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold text-sm transition shadow-lg">Submit Payment for Approval</button>
+            </div>
+        </div>
+
+        <!-- SECTION 2: Pending Approval Screen -->
+        <div id="pending-notice" class="hidden glass p-10 rounded-2xl text-center max-w-xl mx-auto space-y-4 border border-yellow-500/30">
+            <div class="w-16 h-16 bg-yellow-500/10 text-yellow-400 rounded-full flex items-center justify-center mx-auto text-2xl">
+                <i class="fa-solid fa-clock animate-pulse"></i>
+            </div>
+            <h2 class="text-2xl font-bold">Approval Request Pending</h2>
+            <p class="text-sm text-slate-300">Your payment details have been emailed to <span class="text-indigo-400 font-mono">lagharitahir08@gmail.com</span>. Please wait a moment for approval.</p>
+        </div>
+
+        <!-- SECTION 3: Main Dashboard (Unlocked after approval) -->
+        <div id="dashboard-section" class="hidden space-y-8">
+            <div class="glass p-4 rounded-xl border border-emerald-500/40 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-circle-check text-emerald-400 text-xl"></i>
+                    <div>
+                        <h4 class="font-bold text-sm">Account Active & Unlocked</h4>
+                        <p class="text-xs text-slate-400">You can now connect Meta accounts and run automated campaigns.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Social Media Connection -->
+                <div class="glass p-6 rounded-2xl space-y-4 border border-slate-800">
+                    <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-brands fa-meta text-blue-500"></i> Connect Meta Platforms</h2>
+                    <p class="text-xs text-slate-400">Link your Facebook Pages or Instagram Business accounts to allow automated posting.</p>
+                    
+                    <button id="connect-btn" onclick="connectMeta()" class="bg-blue-600 hover:bg-blue-500 px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                        <i class="fa-brands fa-facebook"></i> Connect Facebook / Instagram Page
+                    </button>
+
+                    <div id="connection-status" class="text-xs text-slate-500 font-mono">Status: Disconnected</div>
+                </div>
+
+                <!-- AI Ad Generator -->
+                <div class="glass p-6 rounded-2xl space-y-4 border border-slate-800">
+                    <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-robot text-purple-400"></i> AI Campaign Generator</h2>
+                    <textarea id="ad-prompt" rows="3" placeholder="Enter product description (e.g. Selling original sneakers with free delivery across Pakistan)..." class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-purple-500"></textarea>
+                    
+                    <button onclick="runAI()" class="bg-purple-600 hover:bg-purple-500 px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                        <i class="fa-solid fa-bolt"></i> Generate & Auto-Schedule Post
+                    </button>
+
+                    <div id="ai-output" class="hidden bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-2 text-xs">
+                        <p class="text-emerald-400 font-bold"><i class="fa-solid fa-check"></i> Post Scheduled Successfully!</p>
+                        <p class="text-slate-300"><strong>Generated Caption:</strong> "Step up your style with premium sneakers! 👟 Free nationwide shipping."</p>
+                        <p class="text-slate-400"><strong>Hashtags:</strong> #Sneakers #PakistanShopping #OnlineDeals</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let selectedPlanName = "";
+        let selectedPlanPrice = "";
+
+        function selectPlan(plan, price) {
+            selectedPlanName = plan;
+            selectedPlanPrice = price;
+            document.getElementById('selected-plan-badge').innerText = plan + " (" + price + " PKR)";
+            document.getElementById('payment-form').classList.remove('hidden');
+            window.scrollTo({ top: document.getElementById('payment-form').offsetTop, behavior: 'smooth' });
+        }
+
+        async function submitSubscription() {
+            const name = document.getElementById('user-name').value;
+            const email = document.getElementById('user-email').value;
+            const txid = document.getElementById('user-txid').value;
+
+            if (!name || !email || !txid) {
+                alert("Please fill in all details!");
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/submit-subscription', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, plan: selectedPlanName, price: selectedPlanPrice, txid })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('pricing-section').classList.add('hidden');
+                    document.getElementById('pending-notice').classList.remove('hidden');
+                } else {
+                    alert("Email sending failed. Please check Nodemailer config.");
+                }
+            } catch(e) {
+                alert("Cannot connect to server. Make sure node server.js is running!");
+            }
+        }
+
+        function connectMeta() {
+            document.getElementById('connection-status').innerText = "Status: Connected to Meta (Page ID: 902182)";
+            document.getElementById('connection-status').className = "text-xs text-emerald-400 font-mono";
+            document.getElementById('connect-btn').innerText = "Account Connected ✓";
+            document.getElementById('connect-btn').className = "bg-emerald-600 px-5 py-2.5 rounded-xl text-xs font-bold cursor-default";
+        }
+
+        function runAI() {
+            const prompt = document.getElementById('ad-prompt').value;
+            if(!prompt) {
+                alert("Please write a product prompt first!");
+                return;
+            }
+            document.getElementById('ai-output').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
