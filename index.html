@@ -19,6 +19,26 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen">
 
+    <!-- Meta / Facebook JavaScript SDK -->
+    <script>
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId      : 'YOUR_META_APP_ID', // Replace with your Facebook Developer App ID
+          cookie     : true,
+          xfbml      : true,
+          version    : 'v19.0'
+        });
+      };
+
+      (function(d, s, id){
+         var js, fjs = d.getElementsByTagName(s)[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement(s); js.id = id;
+         js.src = "https://connect.facebook.net/en_US/sdk.js";
+         fjs.parentNode.insertBefore(js, fjs);
+       }(document, 'script', 'facebook-jssdk'));
+    </script>
+
     <!-- Top Navbar -->
     <nav class="border-b border-slate-800 bg-slate-900/80 sticky top-0 z-50 backdrop-blur-md px-6 py-4 flex justify-between items-center">
         <div class="flex items-center gap-3">
@@ -113,7 +133,9 @@
                     <input type="text" id="user-txid" placeholder="EasyPaisa Transaction ID (Trx ID)" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
                 </div>
 
-                <button onclick="submitSubscription()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold text-sm transition shadow-lg">Submit Payment for Approval</button>
+                <button onclick="submitSubscription()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold text-sm transition shadow-lg flex items-center justify-center gap-2">
+                    <span>Submit Payment for Approval</span>
+                </button>
             </div>
         </div>
 
@@ -123,7 +145,7 @@
                 <i class="fa-solid fa-clock animate-pulse"></i>
             </div>
             <h2 class="text-2xl font-bold">Approval Request Pending</h2>
-            <p class="text-sm text-slate-300">Your payment details have been emailed to <span class="text-indigo-400 font-mono">lagharitahir08@gmail.com</span>. Please wait a moment for approval.</p>
+            <p class="text-sm text-slate-300">Your payment details have been emailed. Please wait a moment for approval.</p>
         </div>
 
         <!-- SECTION 3: Main Dashboard (Unlocked after approval) -->
@@ -139,12 +161,12 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Social Media Connection -->
+                <!-- Real Social Media Connection -->
                 <div class="glass p-6 rounded-2xl space-y-4 border border-slate-800">
                     <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-brands fa-meta text-blue-500"></i> Connect Meta Platforms</h2>
-                    <p class="text-xs text-slate-400">Link your Facebook Pages or Instagram Business accounts to allow automated posting.</p>
+                    <p class="text-xs text-slate-400">Link your Facebook Pages or Instagram Business accounts via Meta Official OAuth.</p>
                     
-                    <button id="connect-btn" onclick="connectMeta()" class="bg-blue-600 hover:bg-blue-500 px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                    <button id="connect-btn" onclick="connectMetaReal()" class="bg-blue-600 hover:bg-blue-500 px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
                         <i class="fa-brands fa-facebook"></i> Connect Facebook / Instagram Page
                     </button>
 
@@ -154,7 +176,7 @@
                 <!-- AI Ad Generator -->
                 <div class="glass p-6 rounded-2xl space-y-4 border border-slate-800">
                     <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-robot text-purple-400"></i> AI Campaign Generator</h2>
-                    <textarea id="ad-prompt" rows="3" placeholder="Enter product description (e.g. Selling original sneakers with free delivery across Pakistan)..." class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-purple-500"></textarea>
+                    <textarea id="ad-prompt" rows="3" placeholder="Enter product description..." class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-purple-500"></textarea>
                     
                     <button onclick="runAI()" class="bg-purple-600 hover:bg-purple-500 px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2">
                         <i class="fa-solid fa-bolt"></i> Generate & Auto-Schedule Post
@@ -171,11 +193,21 @@
 
     </div>
 
+    <!-- PROFESSIONAL POPUP MODAL -->
+    <div id="custom-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+        <div class="glass p-6 rounded-2xl max-w-sm w-full space-y-4 text-center border border-slate-700 shadow-2xl">
+            <div id="modal-icon" class="w-12 h-12 rounded-full flex items-center justify-center mx-auto text-xl"></div>
+            <h3 id="modal-title" class="text-lg font-bold"></h3>
+            <p id="modal-message" class="text-xs text-slate-300"></p>
+            <button onclick="closeModal()" class="w-full bg-indigo-600 hover:bg-indigo-500 py-2 rounded-xl text-xs font-bold">Dismiss</button>
+        </div>
+    </div>
+
     <script>
         let selectedPlanName = "";
         let selectedPlanPrice = "";
 
-        // Check subscription status automatically on page load
+        // Check subscription status on load
         window.addEventListener('DOMContentLoaded', () => {
             const savedUserId = localStorage.getItem('subscription_user_id');
             const savedEmail = localStorage.getItem('subscription_user_email');
@@ -183,10 +215,32 @@
             if (savedUserId || savedEmail) {
                 document.getElementById('pricing-section').classList.add('hidden');
                 document.getElementById('pending-notice').classList.remove('hidden');
-                
                 startPollingStatus(savedUserId, savedEmail);
             }
         });
+
+        function showPopup(title, message, type = 'info') {
+            const modal = document.getElementById('custom-modal');
+            const icon = document.getElementById('modal-icon');
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = message;
+
+            if (type === 'success') {
+                icon.className = "w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl";
+                icon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+            } else if (type === 'error') {
+                icon.className = "w-12 h-12 bg-rose-500/10 text-rose-400 rounded-full flex items-center justify-center mx-auto text-xl";
+                icon.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+            } else {
+                icon.className = "w-12 h-12 bg-indigo-500/10 text-indigo-400 rounded-full flex items-center justify-center mx-auto text-xl";
+                icon.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+        }
 
         function selectPlan(plan, price) {
             selectedPlanName = plan;
@@ -202,7 +256,7 @@
             const txid = document.getElementById('user-txid').value;
 
             if (!name || !email || !txid) {
-                alert("Please fill in all details!");
+                showPopup("Required Fields", "Please complete all fields before submitting.", "error");
                 return;
             }
 
@@ -221,16 +275,47 @@
                     document.getElementById('pricing-section').classList.add('hidden');
                     document.getElementById('pending-notice').classList.remove('hidden');
 
+                    showPopup("Request Submitted", "Your subscription details were sent. We will verify your transaction shorty.", "success");
                     startPollingStatus(data.userId, email);
                 } else {
-                    alert("Email sending failed. Please check Nodemailer config.");
+                    showPopup("Submission Failed", "Email sending failed. Please verify Nodemailer configuration.", "error");
                 }
             } catch(e) {
-                alert("Cannot connect to server. Make sure node server.js is running!");
+                showPopup("Server Error", "Could not connect to the backend server.", "error");
             }
         }
 
-        // Poll backend to check if admin approved the subscription
+        // Real Meta / Facebook Integration Popup
+        function connectMetaReal() {
+            if (typeof FB === 'undefined') {
+                showPopup("Meta SDK Loading", "Facebook SDK is initializing or blocked by an ad-blocker.", "error");
+                return;
+            }
+
+            FB.login(function(response) {
+                if (response.authResponse) {
+                    const accessToken = response.authResponse.accessToken;
+                    
+                    // Fetch Connected Pages
+                    FB.api('/me/accounts', { access_token: accessToken }, function(pageResponse) {
+                        if (pageResponse.data && pageResponse.data.length > 0) {
+                            const page = pageResponse.data[0];
+                            document.getElementById('connection-status').innerText = `Status: Connected to ${page.name} (ID: ${page.id})`;
+                            document.getElementById('connection-status').className = "text-xs text-emerald-400 font-mono";
+                            document.getElementById('connect-btn').innerText = "Meta Connected ✓";
+                            document.getElementById('connect-btn').className = "bg-emerald-600 px-5 py-2.5 rounded-xl text-xs font-bold cursor-default";
+                            
+                            showPopup("Meta Connected", `Successfully connected Facebook Page: ${page.name}`, "success");
+                        } else {
+                            showPopup("No Pages Found", "Connected Facebook account has no manageable pages.", "info");
+                        }
+                    });
+                } else {
+                    showPopup("Connection Cancelled", "Facebook authorization was cancelled by the user.", "info");
+                }
+            }, { scope: 'pages_show_list,pages_manage_posts,public_profile' });
+        }
+
         function startPollingStatus(userId, userEmail) {
             const identifier = userEmail || userId;
             if (!identifier) return;
@@ -245,9 +330,9 @@
                         unlockDashboard();
                     }
                 } catch (e) {
-                    console.error("Error checking status:", e);
+                    console.error("Status check error:", e);
                 }
-            }, 3000); // Checks every 3 seconds
+            }, 3000);
         }
 
         function unlockDashboard() {
@@ -258,19 +343,14 @@
             const badge = document.getElementById('user-status-badge');
             badge.className = "bg-emerald-500/10 text-emerald-400 text-xs font-semibold px-3 py-1.5 rounded-full border border-emerald-500/20 flex items-center gap-2";
             badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Subscription: Active`;
-        }
-
-        function connectMeta() {
-            document.getElementById('connection-status').innerText = "Status: Connected to Meta (Page ID: 902182)";
-            document.getElementById('connection-status').className = "text-xs text-emerald-400 font-mono";
-            document.getElementById('connect-btn').innerText = "Account Connected ✓";
-            document.getElementById('connect-btn').className = "bg-emerald-600 px-5 py-2.5 rounded-xl text-xs font-bold cursor-default";
+            
+            showPopup("Subscription Active", "Your account has been approved. You can now publish automated posts.", "success");
         }
 
         function runAI() {
             const prompt = document.getElementById('ad-prompt').value;
             if(!prompt) {
-                alert("Please write a product prompt first!");
+                showPopup("Empty Prompt", "Please enter a product description first.", "info");
                 return;
             }
             document.getElementById('ai-output').classList.remove('hidden');
