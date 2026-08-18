@@ -1,21 +1,27 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
+const path = require('path');
 const app = express();
 
 app.use(express.json());
+
+// 1. Static files serve karne ke liye
+app.use(express.static(__dirname));
+
+// 2. Home route add karein taake index.html load ho
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 // Gmail Transporter Setup
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: 'lagharitahir08@gmail.com',
-        // Security Recommendation: Always use process.env for sensitive credentials
         pass: process.env.EMAIL_PASS || 'mcfn tmzh qnxd ghaa' 
     }
 });
 
-// Note: In-memory store (users object) will reset on serverless function restarts.
-// Consider using a database like MongoDB or Supabase for persistent data storage.
 let users = {};
 
 app.post('/api/submit-subscription', (req, res) => {
@@ -24,7 +30,6 @@ app.post('/api/submit-subscription', (req, res) => {
 
     users[userId] = { name, email, plan, status: 'pending' };
 
-    // Automatically detect Vercel production domain or fallback to host header
     const protocol = req.headers['x-forwarded-proto'] || 'https';
     const host = process.env.VERCEL_URL || req.headers.host;
     const baseUrl = host.startsWith('http') ? host : `${protocol}://${host}`;
@@ -69,5 +74,4 @@ app.get('/api/approve/:userId', (req, res) => {
     }
 });
 
-// Export Express app for Vercel Serverless Functions
 module.exports = app;
