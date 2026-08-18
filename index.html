@@ -175,6 +175,19 @@
         let selectedPlanName = "";
         let selectedPlanPrice = "";
 
+        // Check subscription status automatically on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUserId = localStorage.getItem('subscription_user_id');
+            const savedEmail = localStorage.getItem('subscription_user_email');
+            
+            if (savedUserId || savedEmail) {
+                document.getElementById('pricing-section').classList.add('hidden');
+                document.getElementById('pending-notice').classList.remove('hidden');
+                
+                startPollingStatus(savedUserId, savedEmail);
+            }
+        });
+
         function selectPlan(plan, price) {
             selectedPlanName = plan;
             selectedPlanPrice = price;
@@ -202,14 +215,49 @@
 
                 const data = await response.json();
                 if (data.success) {
+                    localStorage.setItem('subscription_user_id', data.userId);
+                    localStorage.setItem('subscription_user_email', email);
+
                     document.getElementById('pricing-section').classList.add('hidden');
                     document.getElementById('pending-notice').classList.remove('hidden');
+
+                    startPollingStatus(data.userId, email);
                 } else {
                     alert("Email sending failed. Please check Nodemailer config.");
                 }
             } catch(e) {
                 alert("Cannot connect to server. Make sure node server.js is running!");
             }
+        }
+
+        // Poll backend to check if admin approved the subscription
+        function startPollingStatus(userId, userEmail) {
+            const identifier = userEmail || userId;
+            if (!identifier) return;
+
+            const interval = setInterval(async () => {
+                try {
+                    const res = await fetch(`/api/check-status/${encodeURIComponent(identifier)}`);
+                    const data = await res.json();
+
+                    if (data.status === 'active') {
+                        clearInterval(interval);
+                        unlockDashboard();
+                    }
+                } catch (e) {
+                    console.error("Error checking status:", e);
+                }
+            }, 3000); // Checks every 3 seconds
+        }
+
+        function unlockDashboard() {
+            document.getElementById('pricing-section').classList.add('hidden');
+            document.getElementById('pending-notice').classList.add('hidden');
+            document.getElementById('dashboard-section').classList.remove('hidden');
+
+            const badge = document.getElementById('user-status-badge');
+            badge.className = "bg-emerald-500/10 text-emerald-400 text-xs font-semibold px-3 py-1.5 rounded-full border border-emerald-500/20 flex items-center gap-2";
+            badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Subscription: Active`;
         }
 
         function connectMeta() {
