@@ -6,7 +6,6 @@ const app = express();
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// Persistent store fallback for serverless session lifecycle
 let activeUsers = new Set();
 let userProfiles = {};
 
@@ -14,16 +13,16 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Gmail Transporter Setup
+// Email Transporter Setup
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: 'lagharitahir08@gmail.com',
-        pass: process.env.EMAIL_PASS || 'mcfn tmzh qnxd ghaa' 
+        pass: process.env.EMAIL_PASS || 'mcfn tmzh qnxd ghaa'
     }
 });
 
-// Subscription Submission Route
+// Subscription Submission API
 app.post('/api/submit-subscription', (req, res) => {
     const { name, email, plan, price, txid } = req.body;
     const userId = Date.now().toString();
@@ -65,7 +64,7 @@ app.post('/api/submit-subscription', (req, res) => {
     });
 });
 
-// Approve Subscription Route
+// Subscription Approval API
 app.get('/api/approve/:userId', (req, res) => {
     const { userId } = req.params;
     const { email } = req.query;
@@ -81,7 +80,7 @@ app.get('/api/approve/:userId', (req, res) => {
     `);
 });
 
-// Check Status Polling Route
+// Polling Status Check API
 app.get('/api/check-status/:id', (req, res) => {
     const id = decodeURIComponent(req.params.id);
     if (activeUsers.has(id)) {
@@ -91,14 +90,13 @@ app.get('/api/check-status/:id', (req, res) => {
     }
 });
 
-// AI Campaign Generator Backend Route (Real Engine)
+// AI Ad Campaign Generator API
 app.post('/api/generate-ad', (req, res) => {
     const { prompt } = req.body;
     if (!prompt) {
         return res.status(400).json({ success: false, message: 'Prompt is required' });
     }
 
-    // Auto-generate realistic response based on user prompt
     const generatedAd = {
         caption: `🔥 Exclusive Offer: ${prompt}! Order today and get free delivery across Pakistan. Limited stock available! 🛍️✨`,
         hashtags: '#PakistanShopping #OnlineDeals #SpecialDiscount #TrendingNow',
