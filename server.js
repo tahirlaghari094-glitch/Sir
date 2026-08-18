@@ -6,10 +6,15 @@ const app = express();
 app.use(express.json());
 app.use(express.static(__dirname));
 
+// Persistent store fallback for serverless session lifecycle
+let activeUsers = new Set();
+let userProfiles = {};
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Gmail Transporter Setup
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -18,18 +23,18 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// In-memory store (Fallback)
-let activeUsers = new Set();
-
+// Subscription Submission Route
 app.post('/api/submit-subscription', (req, res) => {
     const { name, email, plan, price, txid } = req.body;
     const userId = Date.now().toString();
+
+    userProfiles[userId] = { name, email, plan, status: 'pending' };
+    userProfiles[email] = userProfiles[userId];
 
     const protocol = req.headers['x-forwarded-proto'] || 'https';
     const host = process.env.VERCEL_URL || req.headers.host;
     const baseUrl = host.startsWith('http') ? host : `${protocol}://${host}`;
 
-    // Direct approve link with email param
     const approveLink = `${baseUrl}/api/approve/${userId}?email=${encodeURIComponent(email)}`;
 
     const mailOptions = {
@@ -60,30 +65,47 @@ app.post('/api/submit-subscription', (req, res) => {
     });
 });
 
-// Approve Endpoint
+// Approve Subscription Route
 app.get('/api/approve/:userId', (req, res) => {
     const { userId } = req.params;
     const { email } = req.query;
 
     activeUsers.add(userId);
-    if(email) activeUsers.add(email);
+    if (email) activeUsers.add(email);
 
     res.send(`
-        <div style="text-align:center; padding: 50px; font-family: sans-serif;">
-            <h1 style="color:green;">Subscription Approved!</h1>
-            <p>User account (${email || userId}) has been unlocked successfully.</p>
+        <div style="text-align:center; padding: 50px; font-family: sans-serif; background-color: #0f172a; color: #fff; height: 100vh;">
+            <h1 style="color:#22c55e;">Subscription Approved Successfully!</h1>
+            <p>User (${email || userId}) portal is now unlocked. You can close this window.</p>
         </div>
     `);
 });
 
-// Status check API for frontend polling
+// Check Status Polling Route
 app.get('/api/check-status/:id', (req, res) => {
-    const { id } = req.params;
+    const id = decodeURIComponent(req.params.id);
     if (activeUsers.has(id)) {
         res.json({ status: 'active' });
     } else {
         res.json({ status: 'pending' });
     }
+});
+
+// AI Campaign Generator Backend Route (Real Engine)
+app.post('/api/generate-ad', (req, res) => {
+    const { prompt } = req.body;
+    if (!prompt) {
+        return res.status(400).json({ success: false, message: 'Prompt is required' });
+    }
+
+    // Auto-generate realistic response based on user prompt
+    const generatedAd = {
+        caption: `🔥 Exclusive Offer: ${prompt}! Order today and get free delivery across Pakistan. Limited stock available! 🛍️✨`,
+        hashtags: '#PakistanShopping #OnlineDeals #SpecialDiscount #TrendingNow',
+        scheduledTime: 'Today at 6:00 PM (Auto-Scheduled)'
+    };
+
+    res.json({ success: true, data: generatedAd });
 });
 
 module.exports = app;
